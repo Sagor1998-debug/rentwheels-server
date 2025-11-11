@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment files (never push secrets)
+.env
+.env.local
+.env.production
+
+# Logs
+npm-debug.log*
+
+# System files
+.DS_Store
