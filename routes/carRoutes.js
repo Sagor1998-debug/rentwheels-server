@@ -1,26 +1,24 @@
 import express from "express";
 import {
   addCar,
-  getCars,
-  getFeaturedCars,
+  getAllCars,
   getCarById,
   getMyListings,
-  updateCar,
-  deleteCar,
+  updateCarStatus,
 } from "../controllers/carController.js";
 import verifyFirebaseToken from "../middlewares/verifyFirebaseToken.js";
 
 const router = express.Router();
 
-// ✅ Protected routes
-router.post("/", verifyFirebaseToken, addCar);                 // Add car
-router.get("/my-listings", verifyFirebaseToken, getMyListings); // My listings
-router.put("/:id", verifyFirebaseToken, updateCar);           // Update car
-router.delete("/:id", verifyFirebaseToken, deleteCar);        // Delete car
+// ✅ Get all cars (homepage, etc.)
+router.get("/", getAllCars);
 
-// ✅ Public routes (static routes before dynamic route)
-router.get("/", getCars);                                     // Browse all cars
-router.get("/featured", getFeaturedCars);                     // Featured cars
-router.get("/:id", getCarById);                               // Get car by ID (dynamic, LAST)
+// ✅ Get single car by ID
+router.get("/:id", getCarById);
+
+// ✅ Protected routes
+router.post("/", verifyFirebaseToken, addCar);
+router.get("/my-listings", verifyFirebaseToken, getMyListings);
+router.put("/:id/status", verifyFirebaseToken, updateCarStatus);
 
 export default router;
