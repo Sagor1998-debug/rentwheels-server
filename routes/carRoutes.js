@@ -1,24 +1,27 @@
-// routes/carRoutes.js
 import express from "express";
-import {
-  addCar,
-  getCars,
-  getFeaturedCars,
-  getCarById,
-  getMyListings,
-  updateCar,
-  deleteCar,
-} from "../controllers/carController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import Car from "../models/Car.js";
 
 const router = express.Router();
 
-router.post("/", protect, addCar);            // Add car (private)
-router.get("/", getCars);                     // Browse cars (public) with query
-router.get("/featured", getFeaturedCars);     // Get 6 featured cars
-router.get("/my-listings", protect, getMyListings); // Provider listings
-router.get("/:id", getCarById);               // Get car by ID
-router.put("/:id", protect, updateCar);       // Update car (private)
-router.delete("/:id", protect, deleteCar);    // Delete car (private)
+// Get all cars
+router.get("/", async (req, res) => {
+  try {
+    const cars = await Car.find();
+    res.json(cars);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch cars", error });
+  }
+});
+
+// Get car by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ message: "Car not found" });
+    res.json(car);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch car", error });
+  }
+});
 
 export default router;
