@@ -1,12 +1,16 @@
-// routes/bookingRoutes.js
 import express from "express";
-import { bookCar, getMyBookings, cancelBooking } from "../controllers/bookingController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import {
+  bookCar,
+  getMyBookings,
+  cancelBooking,
+} from "../controllers/bookingController.js";
+import verifyFirebaseToken from "../middlewares/verifyFirebaseToken.js";
 
 const router = express.Router();
 
-router.post("/", protect, bookCar);
-router.get("/my", protect, getMyBookings);
-router.delete("/:id", protect, cancelBooking); // cancel booking
+// ✅ Protected booking routes
+router.post("/", verifyFirebaseToken, bookCar);           // Book a car
+router.get("/my-bookings", verifyFirebaseToken, getMyBookings); // My bookings
+router.delete("/:id", verifyFirebaseToken, cancelBooking);      // Cancel booking
 
 export default router;
