@@ -5,10 +5,10 @@ import verifyFirebaseToken from "../middlewares/verifyFirebaseToken.js";
 
 const router = express.Router();
 
-// ✅ Get cars posted by the logged-in user
+// Get cars posted by the logged-in user
 router.get("/my-listings", verifyFirebaseToken, async (req, res) => {
   try {
-    const email = req.user.email; // from Firebase decoded token
+    const email = req.user.email; // From Firebase token
     const cars = await Car.find({ ownerEmail: email });
     res.json(cars);
   } catch (error) {
@@ -17,15 +17,14 @@ router.get("/my-listings", verifyFirebaseToken, async (req, res) => {
   }
 });
 
-// ✅ Delete car
+// Delete car
 router.delete("/:id", verifyFirebaseToken, async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ message: "Car not found" });
 
-    // Optional: check if logged-in user owns the car
     if (car.ownerEmail !== req.user.email) {
-      return res.status(403).json({ message: "You are not authorized to delete this car." });
+      return res.status(403).json({ message: "You cannot delete this car." });
     }
 
     await car.deleteOne();
