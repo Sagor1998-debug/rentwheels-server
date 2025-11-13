@@ -1,24 +1,39 @@
+// routes/carRoutes.js
 import express from "express";
-import {
-  addCar,
-  getAllCars,
-  getMyListings,
-  updateCarStatus,
-  deleteCar,
-  getCarById,
-} from "../controllers/carController.js";
-import { protect } from "../middlewares/authMiddleware.js";
+import Car from "../models/Car.js";
+import verifyFirebaseToken from "../middlewares/verifyFirebaseToken.js";
 
 const router = express.Router();
 
-// Public
-router.get("/", getAllCars);
-router.get("/:id", getCarById);
+// ✅ Get cars posted by the logged-in user
+router.get("/my-listings", verifyFirebaseToken, async (req, res) => {
+  try {
+    const email = req.user.email; // from Firebase decoded token
+    const cars = await Car.find({ ownerEmail: email });
+    res.json(cars);
+  } catch (error) {
+    console.error("Fetching my listings failed:", error);
+    res.status(500).json({ message: "Failed to fetch your listings." });
+  }
+});
 
-// Private
-router.post("/", protect, addCar);
-router.get("/my-listings", protect, getMyListings);
-router.put("/:id/status", protect, updateCarStatus);
-router.delete("/:id", protect, deleteCar);
+// ✅ Delete car
+router.delete("/:id", verifyFirebaseToken, async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ message: "Car not found" });
+
+    // Optional: check if logged-in user owns the car
+    if (car.ownerEmail !== req.user.email) {
+      return res.status(403).json({ message: "You are not authorized to delete this car." });
+    }
+
+    await car.deleteOne();
+    res.json({ message: "Car deleted successfully!" });
+  } catch (error) {
+    console.error("Deleting car failed:", error);
+    res.status(500).json({ message: "Failed to delete car." });
+  }
+});
 
 export default router;
