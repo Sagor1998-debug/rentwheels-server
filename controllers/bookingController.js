@@ -7,7 +7,7 @@ export const bookCar = async (req, res) => {
   try {
     const { carId, startDate, endDate } = req.body;
     const userEmail = req.user.email; // From Firebase decoded token
-    const userName = req.user.name || req.user.name || "Unknown User";
+    const userName = req.user.name || "Unknown User";
 
     // Check if the car exists
     const car = await Car.findById(carId);
@@ -18,7 +18,7 @@ export const bookCar = async (req, res) => {
       return res.status(400).json({ message: "Car already booked" });
     }
 
-    // Save booking data
+    // Save booking data with full car info
     const newBooking = new Booking({
       carId,
       userEmail,
@@ -26,6 +26,8 @@ export const bookCar = async (req, res) => {
       startDate,
       endDate,
       carName: car.name,
+      category: car.category || "N/A",       // added category
+      providerName: car.providerName || "N/A", // added provider name
       rentPrice: car.rentPrice,
       providerEmail: car.ownerEmail || "N/A",
       status: "Confirmed",
