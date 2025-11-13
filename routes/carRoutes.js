@@ -2,23 +2,23 @@ import express from "express";
 import {
   addCar,
   getAllCars,
-  getCarById,
   getMyListings,
   updateCarStatus,
+  deleteCar,
+  getCarById,
 } from "../controllers/carController.js";
-import verifyFirebaseToken from "../middlewares/verifyFirebaseToken.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// ✅ Get all cars (homepage, etc.)
+// Public
 router.get("/", getAllCars);
-
-// ✅ Get single car by ID
 router.get("/:id", getCarById);
 
-// ✅ Protected routes
-router.post("/", verifyFirebaseToken, addCar);
-router.get("/my-listings", verifyFirebaseToken, getMyListings);
-router.put("/:id/status", verifyFirebaseToken, updateCarStatus);
+// Private
+router.post("/", protect, addCar);
+router.get("/my-listings", protect, getMyListings);
+router.put("/:id/status", protect, updateCarStatus);
+router.delete("/:id", protect, deleteCar);
 
 export default router;

@@ -91,7 +91,7 @@ export const getMyListings = async (req, res) => {
 /**
  * Update car (protected: only owner)
  */
-export const updateCar = async (req, res) => {
+export const updateCarStatus = async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ message: "Car not found" });
@@ -105,6 +105,18 @@ export const updateCar = async (req, res) => {
     res.status(500).json({ message: "❌ Update failed", error: error.message });
   }
 };
+
+// controllers/carController.js
+
+export const getAllCars = async (req, res) => {
+  try {
+    const cars = await Car.find().sort({ createdAt: -1 });
+    res.status(200).json(cars);
+  } catch (error) {
+    res.status(500).json({ message: "❌ Fetching all cars failed", error: error.message });
+  }
+};
+
 
 /**
  * Delete car (protected: only owner)
@@ -122,3 +134,4 @@ export const deleteCar = async (req, res) => {
     res.status(500).json({ message: "❌ Deletion failed", error: error.message });
   }
 };
+

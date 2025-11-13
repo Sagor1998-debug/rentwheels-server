@@ -10,25 +10,35 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 dotenv.config();
 
 const app = express();
-
-// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
-// ✅ Serve static files (car images)
+// Serve static images
 app.use("/public", express.static("public"));
 
-// ✅ Routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
 
-// ✅ MongoDB Connection
+// MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ✅ Server Listening
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚗 Server running on port ${PORT}`));
+// Default route
+app.get("/", (req, res) => {
+  res.send("🚗 RentWheels Server is Running...");
+});
+
+// 🔹 Start server locally if PORT is set or default 5000
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running locally on http://localhost:${PORT}`);
+  });
+}
+
+// Export app for cloud deployment (Render/Vercel)
+export default app;
