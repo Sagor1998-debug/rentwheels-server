@@ -1,3 +1,4 @@
+// controllers/bookingController.js
 import Booking from "../models/Booking.js";
 import Car from "../models/Car.js";
 
@@ -5,37 +6,52 @@ import Car from "../models/Car.js";
 export const bookCar = async (req, res) => {
   try {
     const { carId, startDate, endDate } = req.body;
+    const userEmail = req.user.email; // From Firebase decoded token
+    const userName = req.user.name || req.user.name || "Unknown User";
+
+    // Check if the car exists
     const car = await Car.findById(carId);
-
     if (!car) return res.status(404).json({ message: "Car not found" });
-    if (car.status === "Unavailable")
-      return res.status(400).json({ message: "Car already booked" });
 
-    const booking = new Booking({
-      car: carId,
-      user: req.user._id,
+    // Check if the car is already booked
+    if (car.status === "unavailable") {
+      return res.status(400).json({ message: "Car already booked" });
+    }
+
+    // Save booking data
+    const newBooking = new Booking({
+      carId,
+      userEmail,
+      userName,
       startDate,
       endDate,
+      carName: car.name,
+      rentPrice: car.rentPrice,
+      providerEmail: car.ownerEmail || "N/A",
+      status: "Confirmed",
     });
 
-    await booking.save();
+    await newBooking.save();
 
-    car.status = "Unavailable";
+    // ✅ Update car status
+    car.status = "unavailable";
     await car.save();
 
-    res.status(201).json({ message: "Booking successful", booking });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(201).json({ message: "Booking successful!", booking: newBooking });
+  } catch (error) {
+    console.error("Booking error:", error);
+    return res.status(500).json({ message: "Server error while booking" });
   }
 };
 
-// ✅ My bookings
+// ✅ Fetch user bookings
 export const getMyBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id }).populate("car");
+    const email = req.user.email;
+    const bookings = await Booking.find({ userEmail: email });
     res.json(bookings);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch bookings" });
   }
 };
 
@@ -43,17 +59,18 @@ export const getMyBookings = async (req, res) => {
 export const cancelBooking = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
-    if (!booking) return res.status(404).json({ message: "Not found" });
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    const car = await Car.findById(booking.car);
+    // ✅ Make car available again
+    const car = await Car.findById(booking.carId);
     if (car) {
-      car.status = "Available";
+      car.status = "available";
       await car.save();
     }
 
-    await Booking.findByIdAndDelete(req.params.id);
-    res.json({ message: "Booking cancelled" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    await booking.deleteOne();
+    res.json({ message: "Booking cancelled and car is now available" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to cancel booking" });
   }
 };

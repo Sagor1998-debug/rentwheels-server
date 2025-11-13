@@ -4,20 +4,15 @@ import mongoose from "mongoose";
 const carSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    description: { type: String },
-    category: {
-      type: String,
-      enum: ["Sedan", "SUV", "Hatchback", "Luxury", "Electric"],
-      required: true,
-    },
+    category: { type: String },
     rentPrice: { type: Number, required: true },
-    location: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    providerName: { type: String, required: true },
-    providerEmail: { type: String, required: true },
-    status: { type: String, enum: ["Available", "Booked"], default: "Available" },
+    imageUrl: { type: String },
+    ownerEmail: { type: String },
+    location: { type: String },
+    status: { type: String, default: "available" }, // ✅ important field
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Car", carSchema);
+const Car = mongoose.model("Car", carSchema);
+export default Car;
