@@ -32,13 +32,10 @@ app.get("/", (req, res) => {
   res.send("🚗 RentWheels Server is Running...");
 });
 
-// 🔹 Start server locally if PORT is set or default 5000
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running locally on http://localhost:${PORT}`);
-  });
-}
+// 🔹 Start server (local and Render)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 
-// Export app for cloud deployment (Render/Vercel)
 export default app;
