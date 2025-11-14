@@ -18,7 +18,8 @@
     "express": "^5.1.0",
     "firebase-admin": "^13.6.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.19.3"
+    "mongoose": "^8.19.3",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.5",

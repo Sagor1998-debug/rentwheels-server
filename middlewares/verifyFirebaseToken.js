@@ -6,22 +6,15 @@ const verifyFirebaseToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token provided" });
+      return res.status(401).json({ message: "Unauthorized: No token provided" });
     }
 
     const token = authHeader.split(" ")[1];
-    const decodedValue = await admin.auth().verifyIdToken(token);
 
-    if (!decodedValue) {
-      return res.status(401).json({ message: "Unauthorized: Invalid token" });
-    }
+    // Verify Firebase ID Token
+    const decoded = await admin.auth().verifyIdToken(token);
 
-    req.user = {
-      email: decodedValue.email,
-      name: decodedValue.name || "User",
-      uid: decodedValue.uid,
-    };
-
+    req.user = decoded; // contains email, uid
     next();
   } catch (error) {
     console.error("Token verification failed:", error.message);
