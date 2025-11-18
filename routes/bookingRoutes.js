@@ -1,7 +1,7 @@
 // routes/bookingRoutes.js
 import express from "express";
 import { bookCar, getMyBookings, cancelBooking } from "../controllers/bookingController.js";
-import verifyFirebaseToken from "../middlewares/verifyFirebaseToken.js";
+import verifyFirebaseToken from "../middleware/verifyFirebaseToken.js";
 
 const router = express.Router();
 
