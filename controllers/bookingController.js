@@ -43,20 +43,38 @@ export const bookCar = async (req, res) => {
 };
 
 // Get my bookings
+
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ userEmail: req.user.email })
       .sort({ createdAt: -1 })
-      .populate("carId", "name imageUrl category rentPrice status");
+      .populate({
+        path: "carId",
+        select: "name imageUrl category rentPrice status providerName providerEmail",
+      });
 
-    res.json(bookings);
+    // 
+    const formattedBookings = bookings.map((booking) => ({
+      _id: booking._id,
+      carId: booking.carId?._id || booking.carId,
+      carName: booking.carId?.name || booking.carName,
+      category: booking.carId?.category || booking.category,
+      rentPrice: booking.carId?.rentPrice || booking.rentPrice,
+      imageUrl: booking.carId?.imageUrl || booking.imageUrl || "/placeholder-car.jpg",
+      providerName: booking.carId?.providerName || booking.providerName,
+      providerEmail: booking.carId?.providerEmail || booking.providerEmail,
+      status: booking.status,
+      createdAt: booking.createdAt,
+    }));
+
+    res.json(formattedBookings);
   } catch (error) {
     console.error("Get bookings error:", error);
     res.status(500).json({ message: "Failed to load bookings" });
   }
 };
 
-// Cancel booking (এটা ছিল না — এখন যোগ করলাম)
+// 
 export const cancelBooking = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
