@@ -44,6 +44,7 @@ export const bookCar = async (req, res) => {
 
 // Get my bookings
 
+// getMyBookings → এইটা পুরোটা রিপ্লেস করো
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ userEmail: req.user.email })
@@ -53,19 +54,23 @@ export const getMyBookings = async (req, res) => {
         select: "name imageUrl category rentPrice status providerName providerEmail",
       });
 
-    // 
-    const formattedBookings = bookings.map((booking) => ({
-      _id: booking._id,
-      carId: booking.carId?._id || booking.carId,
-      carName: booking.carId?.name || booking.carName,
-      category: booking.carId?.category || booking.category,
-      rentPrice: booking.carId?.rentPrice || booking.rentPrice,
-      imageUrl: booking.carId?.imageUrl || booking.imageUrl || "/placeholder-car.jpg",
-      providerName: booking.carId?.providerName || booking.providerName,
-      providerEmail: booking.carId?.providerEmail || booking.providerEmail,
-      status: booking.status,
-      createdAt: booking.createdAt,
-    }));
+    
+    const formattedBookings = bookings.map((booking) => {
+      const car = booking.carId; 
+
+      return {
+        _id: booking._id,
+        carId: car?._id || booking.carId,
+        carName: car?.name || booking.carName || "Unknown Car", 
+        category: car?.category || booking.category || "N/A",
+        rentPrice: car?.rentPrice || booking.rentPrice || 0,
+        imageUrl: car?.imageUrl || booking.imageUrl || "/placeholder.jpg",
+        providerName: car?.providerName || booking.providerName || "Unknown",
+        providerEmail: car?.providerEmail || booking.providerEmail,
+        status: booking.status,
+        createdAt: booking.createdAt,
+      };
+    });
 
     res.json(formattedBookings);
   } catch (error) {
