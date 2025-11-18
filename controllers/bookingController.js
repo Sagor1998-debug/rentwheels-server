@@ -44,7 +44,7 @@ export const bookCar = async (req, res) => {
 
 // Get my bookings
 
-// getMyBookings → এইটা পুরোটা রিপ্লেস করো
+ 
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ userEmail: req.user.email })
@@ -61,7 +61,7 @@ export const getMyBookings = async (req, res) => {
       return {
         _id: booking._id,
         carId: car?._id || booking.carId,
-        carName: car?.name || booking.carName || "Unknown Car", 
+        carName: car?.name || booking.name || "Unknown Car", 
         category: car?.category || booking.category || "N/A",
         rentPrice: car?.rentPrice || booking.rentPrice || 0,
         imageUrl: car?.imageUrl || booking.imageUrl || "/placeholder.jpg",
