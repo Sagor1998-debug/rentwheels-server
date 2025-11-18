@@ -45,40 +45,33 @@ export const bookCar = async (req, res) => {
 // Get my bookings
 
  
+// getMyBookings — পুরোটা রিপ্লেস করো এই কোড দিয়ে
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ userEmail: req.user.email })
       .sort({ createdAt: -1 })
-      .populate({
-        path: "carId",
-        select: "name imageUrl category rentPrice status providerName providerEmail",
-      });
+      .populate("carId");
 
-    
-    const formattedBookings = bookings.map((booking) => {
-      const car = booking.carId; 
+    // এই ফর্ম্যাটিংটা করলে Car Name কখনোই খালি থাকবে না — ১০০% গ্যারান্টি
+    const result = bookings.map((booking) => ({
+      _id: booking._id,
+      carId: booking.carId?._id || booking.carId,
+      carName: booking.carName || (booking.carId?.name) || "Deleted Car",
+      category: booking.category || (booking.carId?.category) || "N/A",
+      rentPrice: booking.rentPrice || (booking.carId?.rentPrice) || 0,
+      imageUrl: booking.imageUrl || (booking.carId?.imageUrl) || "https://via.placeholder.com/300x200.png?text=No+Image",
+      providerName: booking.providerName || (booking.carId?.providerName) || "Unknown Provider",
+      providerEmail: booking.providerEmail || (booking.carId?.providerEmail) || "",
+      status: booking.status || "Confirmed",
+      createdAt: booking.createdAt,
+    }));
 
-      return {
-        _id: booking._id,
-        carId: car?._id || booking.carId,
-        carName: car?.name || booking.name || "Unknown Car", 
-        category: car?.category || booking.category || "N/A",
-        rentPrice: car?.rentPrice || booking.rentPrice || 0,
-        imageUrl: car?.imageUrl || booking.imageUrl || "/placeholder.jpg",
-        providerName: car?.providerName || booking.providerName || "Unknown",
-        providerEmail: car?.providerEmail || booking.providerEmail,
-        status: booking.status,
-        createdAt: booking.createdAt,
-      };
-    });
-
-    res.json(formattedBookings);
+    res.json(result);
   } catch (error) {
-    console.error("Get bookings error:", error);
+    console.error("Get my bookings error:", error);
     res.status(500).json({ message: "Failed to load bookings" });
   }
 };
-
 // 
 export const cancelBooking = async (req, res) => {
   try {
