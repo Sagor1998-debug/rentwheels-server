@@ -81,10 +81,12 @@ export const getCarById = async (req, res) => {
  */
 export const getMyListings = async (req, res) => {
   try {
-    const cars = await Car.find({ providerEmail: req.user.email }).sort({ createdAt: -1 });
+    const cars = await Car.find({ providerEmail: req.user.email })
+      .sort({ createdAt: -1 });
     res.json(cars);
   } catch (error) {
-    res.status(500).json({ message: "❌ Failed to fetch listings", error: error.message });
+    console.error("Error fetching my listings:", error);
+    res.status(500).json({ message: "Failed to fetch your listings" });
   }
 };
 
