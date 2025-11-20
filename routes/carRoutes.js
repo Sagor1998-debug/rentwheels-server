@@ -5,7 +5,7 @@ import verifyFirebaseToken from "../middleware/verifyFirebaseToken.js";
 
 const router = express.Router();
 
-// 1. Home page - সব গাড়ি দেখাবে
+// 1. Home page 
 router.get("/", async (req, res) => {
   try {
     const cars = await Car.find().sort({ createdAt: -1 });
@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 2. My Listings - নিজের গাড়ি দেখাবে
+// 2. My Listings 
 router.get("/my-listings", verifyFirebaseToken, async (req, res) => {
   try {
     const cars = await Car.find({ providerEmail: req.user.email }).sort({ createdAt: -1 });
@@ -27,7 +27,7 @@ router.get("/my-listings", verifyFirebaseToken, async (req, res) => {
   }
 });
 
-// 3. GET by ID - Car Details পেজ
+// 3. GET by ID - Car Details 
 router.get("/:id", async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
@@ -41,7 +41,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// 4. POST - নতুন গাড়ি যোগ করা (এটাই মিসিং ছিল!)
+// 4. POST 
 router.post("/", verifyFirebaseToken, async (req, res) => {
   try {
     const {
@@ -53,7 +53,7 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       imageUrl,
     } = req.body;
 
-    // বাধ্যতামূলক ফিল্ড চেক
+    //
     if (!name || !category || !rentPrice || !location || !imageUrl) {
       return res.status(400).json({ message: "Please fill all required fields" });
     }
@@ -67,7 +67,7 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       imageUrl,
       providerName: req.user.name || req.user.email.split("@")[0],
       providerEmail: req.user.email,
-      status: "available", // ছোট হাতের!
+      status: "available", 
     });
 
     await newCar.save();
@@ -78,7 +78,27 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
   }
 });
 
-// 5. DELETE - গাড়ি ডিলিট (MyListings থেকে)
+// Update car
+router.put("/:id", verifyFirebaseToken, async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ message: "Car not found" });
+    if (car.providerEmail !== req.user.email) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const updatedCar = await Car.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.json({ message: "Car updated successfully", car: updatedCar });
+  } catch (error) {
+    res.status(500).json({ message: "Update failed" });
+  }
+});
+
+
 router.delete("/:id", verifyFirebaseToken, async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
